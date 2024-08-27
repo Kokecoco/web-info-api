@@ -1,10 +1,17 @@
+const express = require("express");
 const axios = require("axios");
 const cheerio = require("cheerio");
 
-const URL = "https://example.com"; // 対象のURLを指定
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-// タイトルとサブタイトルを抽出する関数
-async function getTitleAndSubtitle(url) {
+app.get("/api/get-info", async (req, res) => {
+  const url = req.query.url;
+
+  if (!url) {
+    return res.status(400).json({ error: "URL is required" });
+  }
+
   try {
     const response = await axios.get(url);
     const $ = cheerio.load(response.data);
@@ -13,11 +20,10 @@ async function getTitleAndSubtitle(url) {
     let title = $("title").text();
     // メタタグのauthorを取得
     let author = $('meta[name="author"]').attr("content") || "手動";
-    // ここでタイトルの分割処理を行う
 
-    // 区切り文字のリスト
+    // 区切り文字のリスト（全角・半角パイプ、ハイフン、ダッシュ、全角ハイフン、全角スペース）
     const delimiters = [
-      /(?:\s*[\|\-\–\—\－\—\s]+)\s*/g, // パイプ、ハイフン、ダッシュ、全角ハイフン、全角スペース
+      /(?:\s*[\|\｜\-–—－—　]+\s*)/g, // 半角パイプ(｜)、全角パイプ(｜)、ハイフン、エンダッシュ、エムダッシュ、全角ハイフン、全角スペースに対応
     ];
 
     // 各区切り文字で分割する
@@ -32,27 +38,23 @@ async function getTitleAndSubtitle(url) {
     }
 
     // 結果を返す
-    return {
+    res.json({
       title: title || "タイトルなし",
       subtitle: subtitle || "サブタイトルなし",
       author: author,
       creationDate: new Date().toISOString().split("T")[0], // 現在の日付をISO形式で取得
-    };
+    });
   } catch (error) {
     console.error("Error fetching the URL:", error);
-    return {
+    res.status(500).json({
       title: "タイトルなし",
       subtitle: "サブタイトルなし",
       author: "手動",
       creationDate: new Date().toISOString().split("T")[0],
-    };
+    });
   }
-}
+});
 
-// 関数を実行し、結果をコンソールに出力
-getTitleAndSubtitle(URL).then((result) => {
-  console.log("Title:", result.title);
-  console.log("Subtitle:", result.subtitle);
-  console.log("Author:", result.author);
-  console.log("Creation Date:", result.creationDate);
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
