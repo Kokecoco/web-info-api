@@ -36,7 +36,7 @@ app.get("/api/get-info", async (req, res) => {
       $("time").attr("datetime") ||
       $(".entry-date.date.published").text() || // WordPressのテーマでよく見られるパターン
       $(".post-date .entry-date").text() || // 例: 独自のテーマが使用されている場合
-      null; // 存在しない場合はnull
+      ""; // 存在しない場合はnull
 
     // 日付をフォーマットして統一
     creationDate = formatDate(creationDate);
@@ -49,7 +49,7 @@ app.get("/api/get-info", async (req, res) => {
       $(".author").text() ||
       $(".post-author").text() ||
       $('a[rel="author"]').text() ||
-      null; // 存在しない場合はnull
+      ""; // 存在しない場合はnull
 
     author = author.trim();
 
