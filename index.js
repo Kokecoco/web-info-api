@@ -42,7 +42,7 @@ app.get("/api/get-info", async (req, res) => {
     creationDate = formatDate(creationDate);
 
     // メタタグやHTML内の情報から作者を取得する
-    const author =
+    let author =
       $('meta[name="author"]').attr("content") ||
       $('meta[property="article:author"]').attr("content") ||
       $('meta[itemprop="author"]').attr("content") ||
@@ -50,6 +50,8 @@ app.get("/api/get-info", async (req, res) => {
       $(".post-author").text() ||
       $('a[rel="author"]').text() ||
       null; // 存在しない場合はnull
+
+    author = author.trim();
 
     // 区切り文字のリスト（全角・半角パイプ、ハイフン、ダッシュ、全角ハイフン、全角スペース）
     const delimiters = [
