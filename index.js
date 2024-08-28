@@ -1,9 +1,17 @@
 const express = require("express");
 const axios = require("axios");
 const cheerio = require("cheerio");
+const moment = require("moment"); // 日付のフォーマットに便利なライブラリ
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Moment.jsで日付フォーマットを統一
+const formatDate = (dateString) => {
+  if (!dateString) return null;
+  const date = moment(new Date(dateString));
+  return date.isValid() ? date.format("YYYY-MM-DD") : null;
+};
 
 app.get("/api/get-info", async (req, res) => {
   const url = req.query.url;
@@ -18,15 +26,37 @@ app.get("/api/get-info", async (req, res) => {
 
     // ページのタイトルを取得
     let title = $("title").text();
-    // メタタグのauthorを取得
-    let author = $('meta[name="author"]').attr("content") || "手動";
+
+    // メタタグやHTML内の情報から作成日を取得する（WordPressテーマの対応を含む）
+    let creationDate =
+      $('meta[name="date"]').attr("content") ||
+      $('meta[property="article:published_time"]').attr("content") ||
+      $('meta[name="publish_date"]').attr("content") ||
+      $('meta[itemprop="datePublished"]').attr("content") ||
+      $("time").attr("datetime") ||
+      $(".entry-date.date.published").text() || // WordPressのテーマでよく見られるパターン
+      $(".post-date .entry-date").text() || // 例: 独自のテーマが使用されている場合
+      null; // 存在しない場合はnull
+
+    // 日付をフォーマットして統一
+    creationDate = formatDate(creationDate);
+
+    // メタタグやHTML内の情報から作者を取得する
+    const author =
+      $('meta[name="author"]').attr("content") ||
+      $('meta[property="article:author"]').attr("content") ||
+      $('meta[itemprop="author"]').attr("content") ||
+      $(".author").text() ||
+      $(".post-author").text() ||
+      $('a[rel="author"]').text() ||
+      null; // 存在しない場合はnull
 
     // 区切り文字のリスト（全角・半角パイプ、ハイフン、ダッシュ、全角ハイフン、全角スペース）
     const delimiters = [
       /(?:\s*[\|\｜\-–—－—　]+\s*)/g, // 半角パイプ(｜)、全角パイプ(｜)、ハイフン、エンダッシュ、エムダッシュ、全角ハイフン、全角スペースに対応
     ];
 
-    // 各区切り文字で分割する
+    // タイトルを区切り文字で分割する
     let subtitle = "";
     for (const delimiter of delimiters) {
       const parts = title.split(delimiter);
@@ -41,16 +71,16 @@ app.get("/api/get-info", async (req, res) => {
     res.json({
       title: title || "タイトルなし",
       subtitle: subtitle || "サブタイトルなし",
-      author: author,
-      creationDate: new Date().toISOString().split("T")[0], // 現在の日付をISO形式で取得
+      author: author || "作者情報なし",
+      creationDate: creationDate || "作成日情報なし",
     });
   } catch (error) {
     console.error("Error fetching the URL:", error);
     res.status(500).json({
       title: "タイトルなし",
       subtitle: "サブタイトルなし",
-      author: "手動",
-      creationDate: new Date().toISOString().split("T")[0],
+      author: null,
+      creationDate: null,
     });
   }
 });
