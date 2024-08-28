@@ -28,8 +28,7 @@ app.get("/api/get-info", async (req, res) => {
     let title = $("title").text();
 
     // メタタグやHTML内の情報から作成日を取得する（WordPressテーマの対応を含む）
-    let creationDate =
-      $('meta[name="date"]').attr("content") ||
+    let creationDate = $('meta[name="date"]').attr("content") ||
       $('meta[property="article:published_time"]').attr("content") ||
       $('meta[name="publish_date"]').attr("content") ||
       $('meta[itemprop="datePublished"]').attr("content") ||
@@ -42,8 +41,7 @@ app.get("/api/get-info", async (req, res) => {
     creationDate = formatDate(creationDate);
 
     // メタタグやHTML内の情報から作者を取得する
-    let author =
-      $('meta[name="author"]').attr("content") ||
+    let author = $('meta[name="author"]').attr("content") ||
       $('meta[property="article:author"]').attr("content") ||
       $('meta[itemprop="author"]').attr("content") ||
       $(".author").text() ||
@@ -55,7 +53,7 @@ app.get("/api/get-info", async (req, res) => {
 
     // 区切り文字のリスト（全角・半角パイプ、ハイフン、ダッシュ、全角ハイフン、全角スペース）
     const delimiters = [
-      /(?:\s*[\|\｜\-–—－—　]+\s*)/g, // 半角パイプ(｜)、全角パイプ(｜)、ハイフン、エンダッシュ、エムダッシュ、全角ハイフン、全角スペースに対応
+      /(?:\s*[\|\｜\-–—－—　\/]+\s*)/g, // 半角パイプ(｜)、全角パイプ(｜)、ハイフン、エンダッシュ、エムダッシュ、全角ハイフン、全角スペースに対応
     ];
 
     // タイトルを区切り文字で分割する
