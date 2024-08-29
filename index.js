@@ -2,9 +2,30 @@ const express = require("express");
 const axios = require("axios");
 const cheerio = require("cheerio");
 const moment = require("moment"); // 日付のフォーマットに便利なライブラリ
+const cors = require("cors"); // CORSミドルウェア
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// 許可するドメインのリスト
+const allowedOrigins = [
+  /^https:\/\/.*\.kits-tools\.net$/,
+  /^https:\/\/.*\.kokecoco\.me$/,
+];
+
+// CORS設定をカスタム
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // originが許可されたドメインとマッチするか確認
+      if (!origin || allowedOrigins.some((pattern) => pattern.test(origin))) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+  }),
+);
 
 // Moment.jsで日付フォーマットを統一
 const formatDate = (dateString) => {
@@ -28,7 +49,8 @@ app.get("/api/get-info", async (req, res) => {
     let title = $("title").text();
 
     // メタタグやHTML内の情報から作成日を取得する（WordPressテーマの対応を含む）
-    let creationDate = $('meta[name="date"]').attr("content") ||
+    let creationDate =
+      $('meta[name="date"]').attr("content") ||
       $('meta[property="article:published_time"]').attr("content") ||
       $('meta[name="publish_date"]').attr("content") ||
       $('meta[itemprop="datePublished"]').attr("content") ||
@@ -41,7 +63,8 @@ app.get("/api/get-info", async (req, res) => {
     creationDate = formatDate(creationDate);
 
     // メタタグやHTML内の情報から作者を取得する
-    let author = $('meta[name="author"]').attr("content") ||
+    let author =
+      $('meta[name="author"]').attr("content") ||
       $('meta[property="article:author"]').attr("content") ||
       $('meta[itemprop="author"]').attr("content") ||
       $(".author").text() ||
