@@ -92,10 +92,10 @@ app.get("/api/get-info", async (req, res) => {
 
     // 結果を返す
     res.json({
-      title: title || "タイトルなし",
-      subtitle: subtitle || "サブタイトルなし",
-      author: author || "作者情報なし",
-      creationDate: creationDate || "作成日情報なし",
+      title: title || null,
+      subtitle: subtitle || null,
+      author: author || null,
+      creationDate: creationDate || null,
     });
   } catch (error) {
     console.error("Error fetching the URL:", error);
