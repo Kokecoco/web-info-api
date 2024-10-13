@@ -48,15 +48,15 @@ app.get("/api/get-info", async (req, res) => {
     // ページのタイトルを取得
     let title = $("title").text();
 
-    // メタタグやHTML内の情報から作成日を取得する（WordPressテーマの対応を含む）
+    // メタタグやHTML内の情報から作成日を取得する
     let creationDate =
       $('meta[name="date"]').attr("content") ||
       $('meta[property="article:published_time"]').attr("content") ||
       $('meta[name="publish_date"]').attr("content") ||
       $('meta[itemprop="datePublished"]').attr("content") ||
       $("time").attr("datetime") ||
-      $(".entry-date.date.published").text() || // WordPressのテーマでよく見られるパターン
-      $(".post-date .entry-date").text() || // 例: 独自のテーマが使用されている場合
+      $(".entry-date.date.published").text() ||
+      $(".post-date .entry-date").text() ||
       ""; // 存在しない場合はnull
 
     // 日付をフォーマットして統一
@@ -98,12 +98,10 @@ app.get("/api/get-info", async (req, res) => {
       creationDate: creationDate || null,
     });
   } catch (error) {
-    console.error("Error fetching the URL:", error);
+    console.error("Error fetching the URL:", error.message || error);
     res.status(500).json({
-      title: null,
-      subtitle: null,
-      author: null,
-      creationDate: null,
+      error: "Failed to fetch data from the provided URL",
+      details: error.message || null,
     });
   }
 });
