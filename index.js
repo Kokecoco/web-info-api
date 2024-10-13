@@ -100,8 +100,8 @@ app.get("/api/get-info", async (req, res) => {
   } catch (error) {
     console.error("Error fetching the URL:", error);
     res.status(500).json({
-      title: "タイトルなし",
-      subtitle: "サブタイトルなし",
+      title: null,
+      subtitle: null,
       author: null,
       creationDate: null,
     });
