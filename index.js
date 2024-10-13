@@ -11,6 +11,7 @@ const PORT = process.env.PORT || 3000;
 const allowedOrigins = [
   /^https:\/\/.*\.kits-tools\.net$/,
   /^https:\/\/.*\.kokecoco\.me$/,
+  /^https:\/\/localhost:4000$/,
 ];
 
 // CORS設定をカスタム
