@@ -1,3 +1,39 @@
+const express = require("express");
+const axios = require("axios");
+const cheerio = require("cheerio");
+const moment = require("moment"); // 日付のフォーマットに便利なライブラリ
+const cors = require("cors"); // CORSミドルウェア
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// 許可するドメインのリスト
+const allowedOrigins = [
+  /^https:\/\/.*\.kits-tools\.net$/,
+  /^https:\/\/.*\.kokecoco\.me$/,
+];
+
+// CORS設定をカスタム
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // originが許可されたドメインとマッチするか確認
+      if (!origin || allowedOrigins.some((pattern) => pattern.test(origin))) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+  }),
+);
+
+// Moment.jsで日付フォーマットを統一
+const formatDate = (dateString) => {
+  if (!dateString) return null;
+  const date = moment(new Date(dateString));
+  return date.isValid() ? date.format("YYYY-MM-DD") : null;
+};
+
 app.get("/api/get-info", async (req, res) => {
   const url = req.query.url;
 
@@ -6,12 +42,10 @@ app.get("/api/get-info", async (req, res) => {
   }
 
   try {
-    // User-Agent、Referer、Accept-Language ヘッダーを追加
+    // User-Agent ヘッダーを追加
     const response = await axios.get(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
-        'Referer': 'https://www.google.com', // 一般的な参照元としてGoogleを指定
-        'Accept-Language': 'ja,en-US;q=0.9,en;q=0.8', // 日本語を優先した言語設定
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
       }
     });
     const $ = cheerio.load(response.data);
@@ -75,4 +109,8 @@ app.get("/api/get-info", async (req, res) => {
       details: error.message || null,
     });
   }
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
