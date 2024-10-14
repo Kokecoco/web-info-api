@@ -52,7 +52,7 @@ app.get("/api/get-info", async (req, res) => {
     const $ = cheerio.load(response.data);
 
     // ページのタイトルを取得
-    let title = $("title").text();
+    let title = $("title").first().text();
 
     // メタタグやHTML内の情報から作成日を取得する
     let creationDate =
