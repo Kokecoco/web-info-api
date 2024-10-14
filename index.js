@@ -96,6 +96,11 @@ app.get("/api/get-info", async (req, res) => {
       }
     }
 
+    if (title && !subtitle) {
+      subtitle = title
+      title = ""
+    }
+
     // 結果を返す
     res.json({
       title: title || null,
