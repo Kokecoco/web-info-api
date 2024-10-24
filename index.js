@@ -112,7 +112,7 @@ app.get("/api/get-info", async (req, res) => {
 
     // ページ内のテキストから著者名を抽出する
     if (!author) {
-      const text = $.text();
+      const text = $("body").not("script").text();  // scriptタグ内を除外してテキストを取得
       // 「著者」や「作者」、他にも「By」や「Written by」なども含めた正規表現
       const authorMatch = text.match(/(?:by|written by|作者[:：]\s*|著者[:：]\s*)([a-zA-Z\u4e00-\u9faf\u3040-\u309f\u30a0-\u30ff\s]+)/i);
       if (authorMatch) {
